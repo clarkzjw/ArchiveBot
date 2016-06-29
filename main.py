@@ -28,6 +28,9 @@ def update():
 			print(message_id, message_url, message_title)
 			value = '<a href="{0}" target="_blank">{1}</a><br>'.format(message_url, message_title)
 			index.write(str(value))
+
+			UpdateDB(message_url, message_title)
+			
 	index.close()
 
 def UpdateDB(message_url, message_title):
