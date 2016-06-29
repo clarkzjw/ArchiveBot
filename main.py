@@ -13,6 +13,7 @@ def update():
 	for resp in responses:
 		message_type = resp['message']['entities'][0]['type']
 		message_id = resp['message']['message_id']
+                
 
 		if message_type == 'url':
 			message_url = resp['message']['text']
