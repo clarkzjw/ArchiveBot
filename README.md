@@ -20,5 +20,6 @@ pip3 install BeautifulSoup4
 
 ## TODO
 
++ add archive.is API
 + Beautify web page UI.
 + Add delete link function to bot.
