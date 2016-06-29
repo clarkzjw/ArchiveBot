@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from pymongo import MongoClient
 from time import sleep
 
-BOT_TOKEN = '***REMOVED***'
+BOT_TOKEN = '<TOKEN>'
 MONGODB_NAME = "localhost"
 MONGODB_PORT = 27017
 bot = telepot.Bot(BOT_TOKEN)
@@ -57,7 +57,7 @@ def UpdateHTML():
 
 	templateLoader = jinja2.FileSystemLoader( searchpath="/" )
 	templateEnv = jinja2.Environment( loader=templateLoader )
-	template = templateEnv.get_template("/home/clarkzjw/code/ArchiveBot/archive.jinja")
+	template = templateEnv.get_template("/path/to/ArchiveBot/archive.jinja")
 	
 	templateMessage = []
 	for i in mycollection.find():
