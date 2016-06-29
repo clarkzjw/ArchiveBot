@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Archive</title>
+</head>
+
+<body>
+
+<ul>
+{% for message in messages %}
+  <li><a href="{{ message.url }}">{{ message.title }}</a></li>
+{% endfor %}
+</ul>
+
+</body>
+</html>

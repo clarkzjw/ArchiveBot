@@ -1,50 +1,75 @@
 import telepot
 import urllib.request
-import pymongo
-from pymongo import MongoClient
+import jinja2
 
-from time import sleep
 from bs4 import BeautifulSoup
+from pymongo import MongoClient
+from time import sleep
 
 BOT_TOKEN = '***REMOVED***'
+MONGODB_NAME = "localhost"
+MONGODB_PORT = 27017
 bot = telepot.Bot(BOT_TOKEN)
 
-def update():
-	index = open("archive.html", "w")
+def UpdateFromTelegram():
 	responses = iter(bot.getUpdates())
 
 	for resp in responses:
 		message_type = resp['message']['entities'][0]['type']
 		message_id = resp['message']['message_id']
                 
-
 		if message_type == 'url':
-			message_url = resp['message']['text']
-			response = urllib.request.urlopen(message_url)
-			data = response.read()
-			soup = BeautifulSoup(data, "lxml")
-			message_title = soup.title.string
+			if FindRecord(message_id) == False:
+				message_url = resp['message']['text']
+				response = urllib.request.urlopen(message_url)
+				data = response.read()
+				soup = BeautifulSoup(data, "lxml")
+				message_title = soup.title.string
 
-			print(message_id, message_url, message_title)
-			value = '<a href="{0}" target="_blank">{1}</a><br>'.format(message_url, message_title)
-			index.write(str(value))
+				print(message_id, message_url, message_title)
+				InsertDB(message_id, message_url, message_title)
+			else:
+				print("Exist!")
 
-			UpdateDB(message_url, message_title)
+	UpdateHTML()
 
-	index.close()
-
-def UpdateDB(message_url, message_title):
-	Conn = MongoClient()
+def FindRecord(message_id):
+	Conn = MongoClient(MONGODB_NAME, MONGODB_PORT)
 	database = Conn['archivebot']
 	mycollection = database.entries
-	post = {"url": message_url, "title": message_title}
+	res = mycollection.find({"id": message_id})
+	if res.count() == 0:
+		return False
+	else:
+		return True
+
+def InsertDB(message_id, message_url, message_title):
+	Conn = MongoClient(MONGODB_NAME, MONGODB_PORT)
+	database = Conn['archivebot']
+	mycollection = database.entries
+	post = {"id": message_id, "url": message_url, "title": message_title}
 	mycollection.insert(post)
 
-	for e in mycollection.find():
-		print(e)
+def UpdateHTML():
+	Conn = MongoClient(MONGODB_NAME, MONGODB_PORT)
+	database = Conn['archivebot']
+	mycollection = database.entries
+
+	templateLoader = jinja2.FileSystemLoader( searchpath="/" )
+	templateEnv = jinja2.Environment( loader=templateLoader )
+	template = templateEnv.get_template("/home/clarkzjw/code/ArchiveBot/archive.jinja")
+	
+	templateMessage = []
+	for i in mycollection.find():
+		templateMessage.append({"url": i["url"], "title": i["title"]})
+
+	templateR = {"messages": templateMessage}
+	output = template.render(templateR)
+	index = open("./archive.html", "w")
+	index.write(output)
+	index.close()
 
 if __name__ == "__main__":
-	while(1):
-		print("Update")
-		update()
+	while(True):
+		UpdateFromTelegram()
 		sleep(10)
