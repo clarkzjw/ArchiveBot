@@ -1,5 +1,8 @@
 import telepot
 import urllib.request
+import pymongo
+from pymongo import Connection
+
 from time import sleep
 from bs4 import BeautifulSoup
 
@@ -26,6 +29,16 @@ def update():
 			value = '<a href="{0}" target="_blank">{1}</a><br>'.format(message_url, message_title)
 			index.write(str(value))
 	index.close()
+
+def UpdateDB(message_url, message_title):
+	Conn = Connection()
+	database = Conn['archive.jinwei.me']
+	mycollection = database.entries
+	post = {"url": message_url, "title": message_title}
+	mycollection.insert(post)
+
+	for e in mycollection.find():
+		print(e)
 
 if __name__ == "__main__":
 	while(1):
