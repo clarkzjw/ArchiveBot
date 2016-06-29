@@ -1,7 +1,7 @@
 import telepot
 import urllib.request
 import pymongo
-from pymongo import Connection
+from pymongo import MongoClient
 
 from time import sleep
 from bs4 import BeautifulSoup
@@ -30,12 +30,12 @@ def update():
 			index.write(str(value))
 
 			UpdateDB(message_url, message_title)
-			
+
 	index.close()
 
 def UpdateDB(message_url, message_title):
-	Conn = Connection()
-	database = Conn['archive.jinwei.me']
+	Conn = MongoClient()
+	database = Conn['archivebot']
 	mycollection = database.entries
 	post = {"url": message_url, "title": message_title}
 	mycollection.insert(post)
