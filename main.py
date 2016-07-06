@@ -14,6 +14,9 @@ def UpdateFromTelegram():
     responses = iter(bot.getUpdates())
 
     for resp in responses:
+        if 'message' not in resp:
+            continue
+
         message = resp['message']
         if 'entities' not in message:
             continue
@@ -24,13 +27,18 @@ def UpdateFromTelegram():
         if message_type == 'url':
             if FindRecord(message_id) == False:
                 message_url = resp['message']['text']
-                response = urllib.request.urlopen(message_url)
-                data = response.read()
-                soup = BeautifulSoup(data, "lxml")
-                message_title = soup.title.string
+                try:
+                    response = urllib.request.urlopen(message_url)
+                    data = response.read()
+                    soup = BeautifulSoup(data, "lxml")
+                    if soup.title == None:
+                        continue
+                    message_title = soup.title.string
 
-                print(message_id, message_url, message_title)
-                InsertDB(message_id, message_url, message_title)
+                    print(message_id, message_url, message_title)
+                    InsertDB(message_id, message_url, message_title)
+                except ValueError:
+                    continue
             else:
                 print(time.ctime(time.time()) + " id:" + str(message_id) + " Exist!")
 
@@ -47,7 +55,7 @@ def FindRecord(message_id):
         return True
 
 def InsertDB(message_id, message_url, message_title):
-    print(time.ctime(time.time()) + " Insert " + message_id + " " + message_url)
+    print(time.ctime(time.time()) + " Insert " + str(message_id) + " " + message_url)
     Conn = MongoClient(MONGODB_NAME)
     database = Conn['archivebot']
     mycollection = database.entries
