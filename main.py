@@ -1,24 +1,25 @@
+import telepot
+import urllib.request
+import json
 import jinja2
- 
-from pprint import pprint
+import time
+
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
-from time import sleep
 
 BOT_TOKEN = ''
 MONGODB_NAME = ''
-bot = telepot.Bot(BOT_TOKEN)
 
 def UpdateFromTelegram():
     responses = iter(bot.getUpdates())
 
     for resp in responses:
-        # TODO
-        # Check whether every message has 'entities'
-        #pprint(resp)
+        message = resp['message']
+        if 'entities' not in message:
+            continue
 
-        message_type = resp['message']['entities'][0]['type']
-        message_id = resp['message']['message_id']
+        message_type = message['entities'][0]['type']
+        message_id = message['message_id']
 
         if message_type == 'url':
             if FindRecord(message_id) == False:
@@ -31,7 +32,7 @@ def UpdateFromTelegram():
                 print(message_id, message_url, message_title)
                 InsertDB(message_id, message_url, message_title)
             else:
-                print("Exist!")
+                print(time.ctime(time.time()) + " id:" + str(message_id) + " Exist!")
 
     UpdateHTML()
 
@@ -46,6 +47,7 @@ def FindRecord(message_id):
         return True
 
 def InsertDB(message_id, message_url, message_title):
+    print(time.ctime(time.time()) + " Insert " + message_id + " " + message_url)
     Conn = MongoClient(MONGODB_NAME)
     database = Conn['archivebot']
     mycollection = database.entries
@@ -53,6 +55,7 @@ def InsertDB(message_id, message_url, message_title):
     mycollection.insert(post)
 
 def UpdateHTML():
+    print(time.ctime(time.time()) + " Update HTML")
     Conn = MongoClient(MONGODB_NAME)
     database = Conn['archivebot']
     mycollection = database.entries
@@ -72,7 +75,13 @@ def UpdateHTML():
     index.close()
 
 if __name__ == "__main__":
+    configfile = open("./config.json")
+    config = json.load(configfile)
+    MONGODB_NAME = config["MONGODB_NAME"]
+    BOT_TOKEN = config["BOT_TOKEN"]
+
+    bot = telepot.Bot(BOT_TOKEN)
     while(True):
-        print("Update")
+        print(time.ctime(time.time()) + " Update from Telegram")
         UpdateFromTelegram()
-        sleep(10)
+        time.sleep(10)
