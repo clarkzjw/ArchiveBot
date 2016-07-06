@@ -32,6 +32,12 @@ pip3 install https://github.com/pallets/jinja/zipball/master
 	pip3 install telepot
 	```
 
+-	lxml
+
+	```
+	sudo apt-get install python3-lxml
+	```
+
 	TODO
 	----
 

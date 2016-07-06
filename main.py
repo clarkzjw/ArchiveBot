@@ -1,13 +1,12 @@
-import telepot
-import urllib.request
 import jinja2
-
+ 
+from pprint import pprint
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
 from time import sleep
 
-BOT_TOKEN = '***REMOVED***'
-MONGODB_NAME = '***REMOVED***'
+BOT_TOKEN = ''
+MONGODB_NAME = ''
 bot = telepot.Bot(BOT_TOKEN)
 
 def UpdateFromTelegram():
@@ -16,6 +15,7 @@ def UpdateFromTelegram():
     for resp in responses:
         # TODO
         # Check whether every message has 'entities'
+        #pprint(resp)
 
         message_type = resp['message']['entities'][0]['type']
         message_id = resp['message']['message_id']
@@ -67,7 +67,7 @@ def UpdateHTML():
 
     templateR = {"messages": templateMessage}
     output = template.render(templateR)
-    index = open("./archive.html", "w")
+    index = open("/home/clarkzjw/Dropbox/archive.html", "w")
     index.write(output)
     index.close()
 
